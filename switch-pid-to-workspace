@@ -1,0 +1,8 @@
+#!/bin/sh
+# usage: switch-pid-to-workspace <PID> <workspace-name>
+PID=$1
+workspace_name=$2
+workspace_id=$(workspace-name-to-id $workspace_name)
+
+window=$(wmctrl -l -p | awk "\$3 == $PID {print \$1}")
+wmctrl -i -r $window -t $workspace_id

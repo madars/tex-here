@@ -1,0 +1,18 @@
+#!/bin/sh
+show_progress()
+{
+    tot=`git diff HEAD | wc -l`
+    plus=`git diff HEAD | grep '^+' | wc -l`
+    minus=`git diff HEAD | grep '^-' | wc -l`
+    echo +$plus -$minus $tot
+}
+
+if [ -n "$1" ]; then
+    clear
+    while true; do
+	show_progress
+	sleep 15
+    done
+else
+    show_progress
+fi
