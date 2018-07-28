@@ -10,6 +10,8 @@ HELPER_SCRIPT=`mktemp -t tex-here-$DOC_NAME-helper-XXX`
 chmod +x $HELPER_SCRIPT
 cat > $HELPER_SCRIPT <<EOF
 #!/bin/sh
+trap "{ rm $HELPER_SCRIPT }" EXIT
+
 # create an empty PDF, to be replaced in the compilation process
 echo | ps2pdf - $DOC_NAME.pdf
 xdg-open $DOC_NAME.pdf &
@@ -25,16 +27,27 @@ $EDITOR $DOC_NAME.tex &
 sleep 0.5; wmctrl -r :ACTIVE: -t $EDITOR_WORKSPACE_ID
 wmctrl -s $EDITOR_WORKSPACE_ID
 
-latexmk -C $DOC_NAME
-latexmk -pdf -pvc $DOC_NAME
-echo TeXer died...
+latexrun --clean-all
+while true; do
+      clear
+      echo [+] Started: \$(date "+%Y-%m-%d %H:%M:%S")
+      latexrun $DOC_NAME
+      jq --raw-output \
+         '.tasks | .[] | .deps | map(select(.[0] == "file")) | .[] | .[1] | .[]' \
+         latex.out/.latexrun.db > latex.out/.tex-here.depends
+      echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
+      echo "\n\n"
+      inotifywait \
+         --quiet \
+         --fromfile latex.out/.tex-here.depends \
+         --event modify,move_self,delete_self,unmount
+      sleep 1
+done
 read _
-exec rm $HELPER_SCRIPT
 EOF
 
 wmctrl -r :ACTIVE: -t $SHELL_WORKSPACE_ID
 
 tmux \
-    new-session -s tex-$DOC_NAME -n pdf $HELPER_SCRIPT \; \
-    new-window -n err 'check-latex-errors loop' \; \
-    new-window -n prog 'git-progress loop'
+    new-session -s tex-$DOC_NAME -n prog 'git-progress loop' \; \
+    new-window -n compile $HELPER_SCRIPT
