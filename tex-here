@@ -53,5 +53,6 @@ EOF
 wmctrl -r :ACTIVE: -t $SHELL_WORKSPACE_ID
 
 tmux \
-    new-session -s tex-$DOC_NAME -n prog 'git-progress loop' \; \
-    new-window -n compile $HELPER_SCRIPT
+    new-session -s tex-$DOC_NAME -n compile $HELPER_SCRIPT \; \
+    new-window -n prog 'git-progress loop' \; \
+    select-window -t compile
