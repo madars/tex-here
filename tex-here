@@ -13,7 +13,11 @@ cat > $HELPER_SCRIPT <<EOF
 trap "{ rm $HELPER_SCRIPT }" EXIT
 
 # create an empty PDF, to be replaced in the compilation process
-echo | ps2pdf - $DOC_NAME.pdf
+echo -n | ps2pdf - $DOC_NAME.pdf
+# add an outline so that PDF viewer will have it open for the real PDF as well
+echo "[/Title (Title Page) /Page 1 /OUT pdfmark" |
+    gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile=$DOC_NAME.pdf $DOC_NAME.pdf /dev/stdin
+
 xdg-open $DOC_NAME.pdf &
 # If your PDF viewer does not take focus you can also try 
 # xdotool search --class ... (for class found by xprop or xwininfo)
