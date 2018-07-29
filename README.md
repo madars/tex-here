@@ -25,7 +25,7 @@ viewer.
 
 - `tmux`, `wmctrl`, `jq`
 - `inotify-tools` (for `inotifywait`)
-- `ghostscript` (`ps2pdf`)
+- `ghostscript` (for `gs` and `ps2pdf`)
 - A LaTeX distribution (`pdflatex`, etc.)
 - Python 3 (for `latexrun`)
 

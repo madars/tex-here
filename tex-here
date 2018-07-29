@@ -17,6 +17,7 @@ echo -n | ps2pdf - $DOC_NAME.pdf
 # add an outline so that PDF viewer will have it open for the real PDF as well
 # (see https://www.imagemagick.org/discourse-server/viewtopic.php?t=26950)
 gs \
+   -q -dBATCH -dNOPAUSE \
    -o $DOC_NAME.pdf \
    -sDEVICE=pdfwrite \
    -c "[ /Title (Title Page) /Page 1 /OUT pdfmark" \
