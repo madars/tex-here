@@ -15,8 +15,13 @@ trap "{ rm $HELPER_SCRIPT }" EXIT
 # create an empty PDF, to be replaced in the compilation process
 echo -n | ps2pdf - $DOC_NAME.pdf
 # add an outline so that PDF viewer will have it open for the real PDF as well
-echo "[/Title (Title Page) /Page 1 /OUT pdfmark" |
-    gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile=$DOC_NAME.pdf $DOC_NAME.pdf /dev/stdin
+# (see https://www.imagemagick.org/discourse-server/viewtopic.php?t=26950)
+gs \
+   -o $DOC_NAME.pdf \
+   -sDEVICE=pdfwrite \
+   -c "[ /Title (Title Page) /Page 1 /OUT pdfmark" \
+   -c "[ /PageMode /UseOutlines /Page 1 /View /FitB /PageLayout /SinglePage /DOCVIEW pdfmark" \
+   -f $DOC_NAME.pdf
 
 xdg-open $DOC_NAME.pdf &
 # If your PDF viewer does not take focus you can also try 
