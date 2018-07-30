@@ -15,7 +15,8 @@ trap "{ rm $HELPER_SCRIPT }" EXIT
 # create an empty PDF, to be replaced in the compilation process
 echo -n | ps2pdf - $DOC_NAME.pdf
 # add an outline so that PDF viewer will have it open for the real PDF as well
-# (see https://www.imagemagick.org/discourse-server/viewtopic.php?t=26950)
+# (see <https://www.imagemagick.org/discourse-server/viewtopic.php?t=26950>
+# <https://www.physics.drexel.edu/~wking/unfolding-disasters-old/posts/PDF_bookmarks_with_Ghostscript/>)
 gs \
    -q -dBATCH -dNOPAUSE \
    -o $DOC_NAME.pdf \
@@ -46,7 +47,7 @@ while true; do
          '.tasks | .[] | .deps | map(select(.[0] == "file")) | .[] | .[1] | .[]' \
          latex.out/.latexrun.db > latex.out/.tex-here.depends
       echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
-      echo "\n\n"
+      echo ""
       inotifywait \
          --quiet \
          --fromfile latex.out/.tex-here.depends \
