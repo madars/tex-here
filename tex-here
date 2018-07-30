@@ -13,16 +13,19 @@ cat > $HELPER_SCRIPT <<EOF
 trap "{ rm $HELPER_SCRIPT }" EXIT
 
 # create an empty PDF, to be replaced in the compilation process
-echo -n | ps2pdf - $DOC_NAME.pdf
-# add an outline so that PDF viewer will have it open for the real PDF as well
-# (see <https://www.imagemagick.org/discourse-server/viewtopic.php?t=26950>
-# <https://www.physics.drexel.edu/~wking/unfolding-disasters-old/posts/PDF_bookmarks_with_Ghostscript/>)
+echo "%!PS\nshowpage\n%%EOF" | ps2pdf - $DOC_NAME.pdf
+echo "%!PS\nshowpage\n%%EOF" | ps2pdf - $DOC_NAME.pdf
+# set it to have placeholder outline (/Title), open at page 1
+# (/PageMode /Page 1), outlines open (/UseOutlines), fit width (/FitH),
+# and continuous (/OneColumn)
+# http://extras.springer.com/1998/978-3-642-72032-1/PDF/PRIMER.PDF
 gs \
    -q -dBATCH -dNOPAUSE \
    -o $DOC_NAME.pdf \
    -sDEVICE=pdfwrite \
    -c "[ /Title (Title Page) /Page 1 /OUT pdfmark" \
-   -c "[ /PageMode /UseOutlines /Page 1 /View /FitB /PageLayout /SinglePage /DOCVIEW pdfmark" \
+   -c "[ /PageMode /UseOutlines /Page 1 /View [ /FitB ] /DOCVIEW pdfmark" \
+   -c "[ {Catalog} << /PageLayout /OneColumn >> /PUT pdfmark" \
    -f $DOC_NAME.pdf
 
 xdg-open $DOC_NAME.pdf &
@@ -30,7 +33,7 @@ xdg-open $DOC_NAME.pdf &
 # xdotool search --class ... (for class found by xprop or xwininfo)
 sleep 0.5; wmctrl -r :ACTIVE: -t $PDF_VIEWER_WORKSPACE_ID
 
-$EDITOR $DOC_NAME.tex &
+# $EDITOR $DOC_NAME.tex &
 # Ideally we'd like to switch window opened by the child process, not
 # the active window. In case of emacs the window is controlled by
 # the master emacs process, not the emacsclient whose PID we'd get, so
@@ -38,15 +41,21 @@ $EDITOR $DOC_NAME.tex &
 sleep 0.5; wmctrl -r :ACTIVE: -t $EDITOR_WORKSPACE_ID
 wmctrl -s $EDITOR_WORKSPACE_ID
 
-latexrun --clean-all
+# latexrun --clean-all
+mkdir -p latex.out
+rm $DOC_NAME.synctex.gz
+ln -sfn latex.out/$DOC_NAME.synctex.gz $DOC_NAME.synctex.gz
+
 while true; do
       clear
       echo [+] Started: \$(date "+%Y-%m-%d %H:%M:%S")
-      latexrun $DOC_NAME
+      latexrun \
+         --latex-args="-synctex=1" \
+         $DOC_NAME
+      echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
       jq --raw-output \
          '.tasks | .[] | .deps | map(select(.[0] == "file")) | .[] | .[1] | .[]' \
          latex.out/.latexrun.db > latex.out/.tex-here.depends
-      echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
       echo ""
       inotifywait \
          --quiet \
