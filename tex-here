@@ -33,7 +33,7 @@ xdg-open $DOC_NAME.pdf &
 # xdotool search --class ... (for class found by xprop or xwininfo)
 sleep 0.5; wmctrl -r :ACTIVE: -t $PDF_VIEWER_WORKSPACE_ID
 
-# $EDITOR $DOC_NAME.tex &
+$EDITOR $DOC_NAME.tex &
 # Ideally we'd like to switch window opened by the child process, not
 # the active window. In case of emacs the window is controlled by
 # the master emacs process, not the emacsclient whose PID we'd get, so
