@@ -14,11 +14,11 @@ trap "{ rm $HELPER_SCRIPT }" EXIT
 
 # create an empty PDF, to be replaced in the compilation process
 echo "%!PS\nshowpage\n%%EOF" | ps2pdf - $DOC_NAME.pdf
-echo "%!PS\nshowpage\n%%EOF" | ps2pdf - $DOC_NAME.pdf
 # set it to have placeholder outline (/Title), open at page 1
-# (/PageMode /Page 1), outlines open (/UseOutlines), fit width (/FitH),
-# and continuous (/OneColumn)
+# (/PageMode /Page 1), outlines open (/UseOutlines), fitting page bounding
+# box to the window (/FitB), and continuous (/OneColumn)
 # http://extras.springer.com/1998/978-3-642-72032-1/PDF/PRIMER.PDF
+# https://www.tug.org/applications/hyperref/manual.html
 gs \
    -q -dBATCH -dNOPAUSE \
    -o $DOC_NAME.pdf \
@@ -43,7 +43,7 @@ wmctrl -s $EDITOR_WORKSPACE_ID
 
 # latexrun --clean-all
 mkdir -p latex.out
-rm $DOC_NAME.synctex.gz
+rm -f $DOC_NAME.synctex.gz
 ln -sfn latex.out/$DOC_NAME.synctex.gz $DOC_NAME.synctex.gz
 
 while true; do
