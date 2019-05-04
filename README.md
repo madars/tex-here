@@ -23,7 +23,7 @@ viewer.
 
 ## Dependencies
 
-- `tmux`, `wmctrl`, `jq`
+- `tmux`, `wmctrl`, `jq`, `evince`
 - `inotify-tools` (for `inotifywait`)
 - `ghostscript` (for `gs` and `ps2pdf`)
 - A LaTeX distribution (`pdflatex`, etc.)

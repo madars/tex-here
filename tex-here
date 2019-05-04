@@ -28,7 +28,9 @@ gs \
    -c "[ {Catalog} << /PageLayout /OneColumn >> /PUT pdfmark" \
    -f $DOC_NAME.pdf
 
-xdg-open $DOC_NAME.pdf &
+# xdg-open associations are hard to change so just hard-code evince
+evince $DOC_NAME.pdf &
+
 # If your PDF viewer does not take focus you can also try 
 # xdotool search --class ... (for class found by xprop or xwininfo)
 sleep 0.5; wmctrl -r :ACTIVE: -t $PDF_VIEWER_WORKSPACE_ID
