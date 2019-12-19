@@ -48,8 +48,10 @@ mkdir -p latex.out
 rm -f $DOC_NAME.synctex.gz
 ln -sfn latex.out/$DOC_NAME.synctex.gz $DOC_NAME.synctex.gz
 
+REASON="(initial launch)"
 while true; do
       clear
+      echo [+] Compilation reason: \$REASON
       echo [+] Started: \$(date "+%Y-%m-%d %H:%M:%S")
       latexrun \
          --latex-args="-synctex=1" \
@@ -57,13 +59,12 @@ while true; do
       echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
       jq --raw-output \
          '.tasks | .[] | .deps | map(select(.[0] == "file")) | .[] | .[1] | .[]' \
-         latex.out/.latexrun.db > latex.out/.tex-here.depends
-      echo ""
-      inotifywait \
-         --quiet \
-         --fromfile latex.out/.tex-here.depends \
-         --event modify,move_self,delete_self,unmount
-      sleep 1
+         latex.out/.latexrun.db | \
+         grep -v '^/dev/null$' > latex.out/.tex-here.depends
+      REASON=\$(inotifywait \
+                   --quiet \
+                   --fromfile latex.out/.tex-here.depends \
+                   --event modify,move_self,delete_self,unmount)
 done
 read _
 EOF
