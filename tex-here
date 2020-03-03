@@ -31,7 +31,7 @@ gs \
 # xdg-open associations are hard to change so just hard-code evince
 evince $DOC_NAME.pdf &
 
-# If your PDF viewer does not take focus you can also try 
+# If your PDF viewer does not take focus you can also try
 # xdotool search --class ... (for class found by xprop or xwininfo)
 sleep 0.5; wmctrl -r :ACTIVE: -t $PDF_VIEWER_WORKSPACE_ID
 
@@ -60,7 +60,8 @@ while true; do
       jq --raw-output \
          '.tasks | .[] | .deps | map(select(.[0] == "file")) | .[] | .[1] | .[]' \
          latex.out/.latexrun.db | \
-         grep -v '^/dev/null$' > latex.out/.tex-here.depends
+         grep -v '^/dev/null$' | \
+         grep -v "latex.out/$DOC_NAME.pdf" > latex.out/.tex-here.depends
       REASON=\$(inotifywait \
                    --quiet \
                    --fromfile latex.out/.tex-here.depends \
