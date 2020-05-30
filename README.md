@@ -12,8 +12,7 @@ tex-here <document-name> [shell-workspace] [editor-workspace] [pdf-viewer-worksp
 ```
 
 Workspace arguments are X11 workspace names (as shown by `wmctrl -d`),
-defaulting to `m1` for the shell, `c1` for the editor, and `c2` for the PDF
-viewer.
+defaulting to `c1` for the shell and editor, and `c2` for the PDF viewer.
 
 ## Scripts
 

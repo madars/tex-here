@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: tex-here <document-name> [workspace-for-shell] [workspace-for-editor] [workspace-for-pdf-viewer]
 DOC_NAME=${1%.tex}
-SHELL_WORKSPACE_ID=$(workspace-name-to-id ${2:-m1})
+SHELL_WORKSPACE_ID=$(workspace-name-to-id ${2:-c1})
 EDITOR_WORKSPACE_ID=$(workspace-name-to-id ${3:-c1})
 PDF_VIEWER_WORKSPACE_ID=$(workspace-name-to-id ${4:-c2})
 
