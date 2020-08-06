@@ -9,8 +9,8 @@ HELPER_SCRIPT=`mktemp -t tex-here-$DOC_NAME-helper-XXX`
 
 chmod +x $HELPER_SCRIPT
 cat > $HELPER_SCRIPT <<EOF
-#!/bin/sh
-trap "{ rm $HELPER_SCRIPT }" EXIT
+#!/bin/bash
+trap "rm $HELPER_SCRIPT" EXIT
 
 # create an empty PDF, to be replaced in the compilation process
 echo "%!PS\nshowpage\n%%EOF" | ps2pdf - $DOC_NAME.pdf
