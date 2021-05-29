@@ -58,10 +58,9 @@ while true; do
          $DOC_NAME
       echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
       jq --raw-output \
-         '.tasks | .[] | .deps | map(select(.[0] == "file")) | .[] | .[1] | .[]' \
+         '.tasks[].deps | map(select(.[0] == "file" and .[2] != null)) | .[][1][]' \
          latex.out/.latexrun.db | \
-         grep -v '^/dev/null$' | \
-         grep -v "latex.out/$DOC_NAME.pdf" > latex.out/.tex-here.depends
+         grep -v '^/dev/null$' > latex.out/.tex-here.depends
       REASON=\$(inotifywait \
                    --quiet \
                    --fromfile latex.out/.tex-here.depends \
