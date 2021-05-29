@@ -1,9 +1,43 @@
 #!/bin/bash
 # usage: tex-here <document-name> [workspace-for-shell] [workspace-for-editor] [workspace-for-pdf-viewer]
+TEX_HERE_DB="$HOME/var/tex-here.json"
+LATEX_DEFAULT_ARGS="-synctex=1"
+
 DOC_NAME=${1%.tex}
 SHELL_WORKSPACE_ID=$(workspace-name-to-id ${2:-c1})
 EDITOR_WORKSPACE_ID=$(workspace-name-to-id ${3:-c1})
 PDF_VIEWER_WORKSPACE_ID=$(workspace-name-to-id ${4:-c2})
+
+###############################################################################
+
+CANONICAL_PATH=$(readlink -f $DOC_NAME.tex)
+
+if [ ! -e $CANONICAL_PATH ]; then
+    echo "$CANONICAL_PATH does not exist."
+    exit 1
+fi
+
+if [ ! -s $TEX_HERE_DB ]; then
+    echo "$TEX_HERE_DB empty, adding placeholder map."
+    echo "{}" > $TEX_HERE_DB
+fi
+
+###############################################################################
+get_tex_here_var()
+{
+    jq -r \
+        --arg CANONICAL_PATH "$CANONICAL_PATH" \
+        --arg VAR "$1" \
+        --arg DEFAULT "$2" \
+        '(.[$CANONICAL_PATH] // {})[$VAR] // $DEFAULT' \
+        $TEX_HERE_DB
+}
+
+LATEX_CMD=$(get_tex_here_var latex-cmd pdflatex)
+LATEX_EXTRA_ARGS=$(get_tex_here_var latex-extra-args "")
+###############################################################################
+
+LATEX_ARGS="$LATEX_DEFAULT_ARGS $LATEX_EXTRA_ARGS"
 
 HELPER_SCRIPT=`mktemp -t tex-here-$DOC_NAME-helper-XXX`
 
@@ -52,9 +86,11 @@ REASON="(initial launch)"
 while true; do
       clear
       echo [+] Compilation reason: \$REASON
+      echo [+] latexrun command: $LATEX_CMD $LATEX_ARGS
       echo [+] Started: \$(date "+%Y-%m-%d %H:%M:%S")
       latexrun \
-         --latex-args="-synctex=1" \
+         --latex-cmd="$LATEX_CMD" \
+         --latex-args="$LATEX_ARGS" \
          $DOC_NAME
       echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
       jq --raw-output \
