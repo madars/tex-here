@@ -63,10 +63,14 @@ fi
 
 printf "latex-cmd: "; read NEW_LATEX_CMD
 printf "latex-extra-args: "; read NEW_LATEX_EXTRA_ARGS
+printf "pre-latexrun-cmd: "; read NEW_PRE_LATEXRUN_CMD
+printf "post-latexrun-cmd: "; read NEW_POST_LATEXRUN_CMD
 
 set_default_dict
 update_tex_here_var latex-cmd "$NEW_LATEX_CMD"
 update_tex_here_var latex-extra-args "$NEW_LATEX_EXTRA_ARGS"
+update_tex_here_var pre-latexrun-cmd "$NEW_PRE_LATEXRUN_CMD"
+update_tex_here_var post-latexrun-cmd "$NEW_POST_LATEXRUN_CMD"
 
 echo "Configuration after update:"
 print_tex_here_vars

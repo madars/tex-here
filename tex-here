@@ -35,6 +35,8 @@ get_tex_here_var()
 
 LATEX_CMD=$(get_tex_here_var latex-cmd pdflatex)
 LATEX_EXTRA_ARGS=$(get_tex_here_var latex-extra-args "")
+PRE_LATEXRUN_CMD=$(get_tex_here_var pre-latexrun-cmd "")
+POST_LATEXRUN_CMD=$(get_tex_here_var post-latexrun-cmd "")
 ###############################################################################
 
 LATEX_ARGS="$LATEX_DEFAULT_ARGS $LATEX_EXTRA_ARGS"
@@ -86,13 +88,21 @@ REASON="(initial launch)"
 while true; do
       clear
       echo [+] Compilation reason: \$REASON
+      if [ "$PRE_LATEXRUN_CMD" != "" ]; then
+          echo [+] Executing pre-latexrun command: $PRE_LATEXRUN_CMD
+          $PRE_LATEXRUN_CMD
+      fi
       echo [+] latexrun command: $LATEX_CMD $LATEX_ARGS
-      echo [+] Started: \$(date "+%Y-%m-%d %H:%M:%S")
+      echo [+] latexrun started: \$(date "+%Y-%m-%d %H:%M:%S")
       latexrun \
          --latex-cmd="$LATEX_CMD" \
          --latex-args="$LATEX_ARGS" \
          $DOC_NAME
-      echo [+] Done: \$(date "+%Y-%m-%d %H:%M:%S")
+      echo [+] latexrun done: \$(date "+%Y-%m-%d %H:%M:%S")
+      if [ "$POST_LATEXRUN_CMD" != "" ]; then
+          echo [+] Executing post-latexrun command: $POST_LATEXRUN_CMD
+          $POST_LATEXRUN_CMD
+      fi
       jq --raw-output \
          '.tasks[].deps | map(select(.[0] == "file" and .[2] != null)) | .[][1][]' \
          latex.out/.latexrun.db | \
@@ -106,6 +116,8 @@ read _
 EOF
 
 wmctrl -r :ACTIVE: -t $SHELL_WORKSPACE_ID
+
+echo "Starting $HELPER_SCRIPT in a tmux session."
 
 tmux \
     new-session -s tex-$DOC_NAME -n compile $HELPER_SCRIPT \; \
