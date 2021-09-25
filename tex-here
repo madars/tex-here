@@ -107,10 +107,16 @@ while true; do
          '.tasks[].deps | map(select(.[0] == "file" and .[2] != null)) | .[][1][]' \
          latex.out/.latexrun.db | \
          grep -v '^/dev/null$' > latex.out/.tex-here.depends
-      REASON=\$(inotifywait \
-                   --quiet \
-                   --fromfile latex.out/.tex-here.depends \
-                   --event modify,move_self,delete_self,unmount)
+      inotifywait \
+         --quiet \
+         --fromfile latex.out/.tex-here.depends \
+         --event modify,move_self,delete_self,unmount 2>&1 > latex.out/.tex-here.inotifywait.out
+      INOTIFY_RESULT=\$?
+      if [ \$INOTIFY_RESULT -ne 0 ]; then
+          cat latex.out/.tex-here.inotifywait.out
+          sleep 5
+      fi
+      REASON=\$(egrep -v "^(Setting up watches\.|Watches established\.)\$" latex.out/.tex-here.inotifywait.out)
 done
 read _
 EOF
