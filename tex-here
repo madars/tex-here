@@ -10,16 +10,16 @@ PDF_VIEWER_WORKSPACE_ID=$(workspace-name-to-id ${4:-c2})
 
 ###############################################################################
 
-CANONICAL_PATH=$(readlink -f $DOC_NAME.tex)
+CANONICAL_PATH=$(readlink -f "$DOC_NAME.tex")
 
-if [ ! -e $CANONICAL_PATH ]; then
+if [ ! -e "$CANONICAL_PATH" ]; then
     echo "$CANONICAL_PATH does not exist."
     exit 1
 fi
 
-if [ ! -s $TEX_HERE_DB ]; then
+if [ ! -s "$TEX_HERE_DB" ]; then
     echo "$TEX_HERE_DB empty, adding placeholder map."
-    echo "{}" > $TEX_HERE_DB
+    echo "{}" > "$TEX_HERE_DB"
 fi
 
 ###############################################################################
@@ -41,12 +41,12 @@ POST_LATEXRUN_CMD=$(get_tex_here_var post-latexrun-cmd "")
 
 LATEX_ARGS="$LATEX_DEFAULT_ARGS $LATEX_EXTRA_ARGS"
 
-HELPER_SCRIPT=`mktemp -t tex-here-$DOC_NAME-helper-XXX`
+HELPER_SCRIPT=$(mktemp -t "tex-here-$DOC_NAME-helper-XXX")
 
-chmod +x $HELPER_SCRIPT
-cat > $HELPER_SCRIPT <<EOF
+chmod +x "$HELPER_SCRIPT"
+cat > "$HELPER_SCRIPT" <<EOF
 #!/bin/bash
-trap "rm $HELPER_SCRIPT" EXIT
+trap "rm ${HELPER_SCRIPT@Q}" EXIT
 
 # create an empty PDF, to be replaced in the compilation process
 echo "%!PS\nshowpage\n%%EOF" | ps2pdf - $DOC_NAME.pdf
@@ -57,21 +57,21 @@ echo "%!PS\nshowpage\n%%EOF" | ps2pdf - $DOC_NAME.pdf
 # https://www.tug.org/applications/hyperref/manual.html
 gs \
    -q -dBATCH -dNOPAUSE \
-   -o $DOC_NAME.pdf \
+   -o "$DOC_NAME.pdf" \
    -sDEVICE=pdfwrite \
    -c "[ /Title (Title Page) /Page 1 /OUT pdfmark" \
    -c "[ /PageMode /UseOutlines /Page 1 /View [ /FitB ] /DOCVIEW pdfmark" \
    -c "[ {Catalog} << /PageLayout /OneColumn >> /PUT pdfmark" \
-   -f $DOC_NAME.pdf
+   -f "$DOC_NAME.pdf"
 
 # xdg-open associations are hard to change so just hard-code evince
-evince $DOC_NAME.pdf &
+evince "$DOC_NAME.pdf" &
 
 # If your PDF viewer does not take focus you can also try
 # xdotool search --class ... (for class found by xprop or xwininfo)
 sleep 0.5; wmctrl -r :ACTIVE: -t $PDF_VIEWER_WORKSPACE_ID
 
-$EDITOR $DOC_NAME.tex &
+$EDITOR "$DOC_NAME.tex" &
 # Ideally we'd like to switch window opened by the child process, not
 # the active window. In case of emacs the window is controlled by
 # the master emacs process, not the emacsclient whose PID we'd get, so
@@ -81,8 +81,8 @@ wmctrl -s $EDITOR_WORKSPACE_ID
 
 # latexrun --clean-all
 mkdir -p latex.out
-rm -f $DOC_NAME.synctex.gz
-ln -sfn latex.out/$DOC_NAME.synctex.gz $DOC_NAME.synctex.gz
+rm -f "$DOC_NAME.synctex.gz"
+ln -sfn "latex.out/$DOC_NAME.synctex.gz" "$DOC_NAME.synctex.gz"
 
 REASON="(initial launch)"
 while true; do
@@ -97,7 +97,7 @@ while true; do
       latexrun \
          --latex-cmd="$LATEX_CMD" \
          --latex-args="$LATEX_ARGS" \
-         $DOC_NAME
+         "$DOC_NAME.tex"
       echo [+] latexrun done: \$(date "+%Y-%m-%d %H:%M:%S")
       if [ "$POST_LATEXRUN_CMD" != "" ]; then
           echo [+] Executing post-latexrun command: $POST_LATEXRUN_CMD
@@ -126,6 +126,6 @@ wmctrl -r :ACTIVE: -t $SHELL_WORKSPACE_ID
 echo "Starting $HELPER_SCRIPT in a tmux session."
 
 tmux \
-    new-session -s tex-$DOC_NAME -n compile $HELPER_SCRIPT \; \
+    new-session -s "tex-$DOC_NAME" -n compile "${HELPER_SCRIPT@Q}" \; \
     new-window -n prog 'git-progress loop' \; \
     select-window -t compile
