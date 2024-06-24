@@ -7,16 +7,16 @@ if [ "$1" = "" ]; then
 fi
 
 DOC_NAME=${1%.tex}
-CANONICAL_PATH=$(readlink -f $DOC_NAME.tex)
+CANONICAL_PATH=$(readlink -f "$DOC_NAME.tex")
 
-if [ ! -e $CANONICAL_PATH ]; then
+if [ ! -e "$CANONICAL_PATH" ]; then
     echo "$CANONICAL_PATH does not exist."
     exit 1
 fi
 
-if [ ! -s $TEX_HERE_DB ]; then
+if [ ! -s "$TEX_HERE_DB" ]; then
     echo "$TEX_HERE_DB empty, adding placeholder map."
-    echo "{}" > $TEX_HERE_DB
+    echo "{}" > "$TEX_HERE_DB"
 fi
 
 ###############################################################################
@@ -24,14 +24,14 @@ print_tex_here_vars()
 {
     jq \
         --arg CANONICAL_PATH "$CANONICAL_PATH" \
-        '.[$CANONICAL_PATH]' $TEX_HERE_DB
+        '.[$CANONICAL_PATH]' "$TEX_HERE_DB"
 }
 
 set_default_dict()
 {
     jq \
         --arg CANONICAL_PATH "$CANONICAL_PATH" \
-        '.[$CANONICAL_PATH] = (.[$CANONICAL_PATH] // {})' $TEX_HERE_DB | sponge $TEX_HERE_DB
+        '.[$CANONICAL_PATH] = (.[$CANONICAL_PATH] // {})' "$TEX_HERE_DB" | sponge "$TEX_HERE_DB"
 }
 
 update_tex_here_var()
@@ -40,13 +40,13 @@ update_tex_here_var()
         jq \
             --arg CANONICAL_PATH "$CANONICAL_PATH" \
             --arg VAR "$1" \
-            'delpaths([[$CANONICAL_PATH, $VAR]])' $TEX_HERE_DB | sponge $TEX_HERE_DB
+            'delpaths([[$CANONICAL_PATH, $VAR]])' "$TEX_HERE_DB" | sponge "$TEX_HERE_DB"
     else
         jq \
             --arg CANONICAL_PATH "$CANONICAL_PATH" \
             --arg VAR "$1" \
             --arg VAL "$2" \
-            '.[$CANONICAL_PATH][$VAR] = $VAL' $TEX_HERE_DB | sponge $TEX_HERE_DB
+            '.[$CANONICAL_PATH][$VAR] = $VAL' "$TEX_HERE_DB" | sponge "$TEX_HERE_DB"
     fi
 
 }
