@@ -110,7 +110,7 @@ while true; do
       inotifywait \
          --quiet \
          --fromfile latex.out/.tex-here.depends \
-         --event modify,move_self,delete_self,unmount 2>&1 > latex.out/.tex-here.inotifywait.out
+         --event modify,move_self,delete_self,unmount > latex.out/.tex-here.inotifywait.out 2>&1
       INOTIFY_RESULT=\$?
       if [ \$INOTIFY_RESULT -ne 0 ]; then
           cat latex.out/.tex-here.inotifywait.out
